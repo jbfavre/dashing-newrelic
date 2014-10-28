@@ -5,22 +5,14 @@ class Newrelic
 
   attr_reader :metrics, :points
 
-  #def initialize(options)
-  #  @metrics  = get_config[:metrics]
-  #  @points = {}
-  #end
-
   def points
     @history = {}
-    app_ids.each do |app_id|
-      metrics.each do |metric|
-        key = "nr_#{app_id}_#{metric.gsub(/ /,'_')}"
-        history = YAML.load Sinatra::Application.settings.history[key].to_s
-        unless history === false
-          @history[key] = history['data']['points'].map{|a| Hash[a.map{|k,v| [k.to_sym,v] }] }
-        else
-          @history[key] = (0..59).map{|a| { x: a, y: 0 } }
-        end
+    keys.each do |key|
+      history = YAML.load Sinatra::Application.settings.history[key].to_s
+      unless history === false
+        @history[key] = history['data']['points'].map{|a| Hash[a.map{|k,v| [k.to_sym,v] }] }
+      else
+        @history[key] = (0..59).map{|a| { x: a, y: 0 } }
       end
     end
     @history
@@ -38,6 +30,18 @@ class Newrelic
     @values
   end
 
+  private
+
+  def keys
+    keys = []
+    app_ids.each do|app_id|
+      metrics.each do |metric|
+        keys.push("nr_#{app_id}_#{metric.gsub(/ /,'_')}")
+      end
+    end
+    keys
+  end
+
   def metrics
     get_config[:metrics]
   end
@@ -45,8 +49,6 @@ class Newrelic
   def app_ids
     get_config[:app_ids]
   end
-
-  private
 
   def newrelic_app
     NewRelicApi.api_key = api_key

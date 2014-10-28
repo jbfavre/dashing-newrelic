@@ -6,11 +6,8 @@ newrelic = Newrelic.new()
 points = newrelic.points
 
 # build points list from history
-newrelic.app_ids.each do |app_id|
-  newrelic.metrics.each do |metric|
-    key = "nr_#{app_id}_#{metric.gsub(/ /,'_')}"
-    last_x[key] = points[key].last[:x]
-  end
+points.each do |key,value|
+  last_x[key] = value.last[:x]
 end
 
 SCHEDULER.every '30s', :first_in => 0 do |job|
@@ -19,19 +16,16 @@ SCHEDULER.every '30s', :first_in => 0 do |job|
   current = newrelic.get_values
 
   # generate dashing events
-  newrelic.app_ids.each do |app_id|
-    newrelic.metrics.each do |metric|
-      key = "nr_#{app_id}_#{metric.gsub(/ /,'_')}"
+  current.each do |key,value|
 
-      ## Drop the first point value and increment x by 1
-      points[key].shift
-      last_x[key] += 1
+    ## Drop the first point value and increment x by 1
+    points[key].shift
+    last_x[key] += 1
 
-      ## Push the most recent point value
-      points[key] << { x: last_x[key], y: current[key] }
+    ## Push the most recent point value
+    points[key] << { x: last_x[key], y: value }
 
-      send_event(key, { current: current[key], points: points[key] })
-    end
+    send_event(key, { current: value, points: points[key] })
   end
 
 end
