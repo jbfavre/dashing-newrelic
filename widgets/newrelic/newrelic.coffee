@@ -48,3 +48,5 @@ class Dashing.Newrelic extends Dashing.Widget
     if @graph
       @graph.series[0].data = data.points
       @graph.render()
+
+    $(@node).fadeOut().fadeIn()
