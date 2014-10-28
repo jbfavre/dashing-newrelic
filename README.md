@@ -1,17 +1,21 @@
 # Customisable New Relic widgets for Dashing
 
+This Newrelic widget for dashing is a fork from [https://github.com/thenayr/dashing-newrelic/](https://github.com/thenayr/dashing-newrelic/).  
+It's much more generic.
+
 ## Description
 
-This is a suite of widgets to help monitor your web applications performance using New Relic.  There are four included widgets but you can easily add new widgets for any metric returned by the New Relic API.
+This is a widget to help monitor your web applications performance using New Relic.  The widget aims to be generic, that is you can use it for multiple application ID and any metric returned by the New Relic API.  
+Default metrics are:
 
 * **Error Rate**
 * **Response Time**
 * **Requests per minute (throughput)**
 * **Apdex**
 
-The widgets are all designed for maximum visibility from a distance. All the widgets contain a maximum of 60 points of data at any given time. The chart will start on the right of the chart and fill over time to be the full width of the widget. Historical data stored by dashing will be used if available.
+The widget is designed for maximum visibility from a distance. Widgets contains a maximum of 60 points of data at any given time. The chart will start on the right of the chart and fill over time to be the full width of the widget. Historical data stored by dashing will be used if available.
 
-Neutral colours are used for behaving values, and high contrast yellow and red for warning and errors respectively. The widgets are responsive and react to changes in the values returned. There are three possible colors, neutral (green), yellow and red.
+Neutral colours are used for behaving values, and high contrast yellow and red for warning and errors respectively. The widget is responsive and react to changes in the values returned. There are three possible colors, neutral (green), yellow and red.
 
 ## Dependencies
 
@@ -38,40 +42,38 @@ Now copy over the `config.yml` into the root directory of your Dashing applicati
 ```yaml
 :newrelic:
   :api_key: "xxxxxxxxxxxxxxx"
-  :app_name: 'Your App Name'
+  :app_ids: [ 'xxxxx', 'yyyyy', 'zzzzz' ]
+  :metrics: [ 'Apdex', 'Error Rate', 'Response Time', 'Throughput' ]
 ```
+These config options get loaded in the job file.
 
-**IMPORTANT** If your app name has any special characters in it, you will need to escape them in the name.  For example: `'My app \(production\)'`
-
-These config options get loaded in each of the separate job files.
-
-Now you only need to add the widgets into your dashboard:
+Now you only need to add the widgets into your dashboard, where `xxxxx` is your application ID:
 
 * **Response time widget**
 ```html
 <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
-  <div id="newrelic_Response_Time" data-id="newrelic_Response_Time" data-view="Newrelic" data-title="Response time" data-green="200" data-yellow="500" ></div>
+  <div id="nr_xxxxx_Response_Time" data-id="nr_xxxxx_Response_Time" data-view="Newrelic" data-title="Response time" data-green="200" data-yellow="500" ></div>
 </li>
 ```
 
 * **RPM (throughput) widget**
 ```html
 <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
-  <div id="newrelic_Throughput" data-id="newrelic_Throughput" data-view="Newrelic" data-title="RPM" data-green="2000" data-yellow="2500" ></div>
+  <div id="nr_xxxxx_Throughput" data-id="nr_xxxxx_Throughput" data-view="Newrelic" data-title="RPM" data-green="2000" data-yellow="2500" ></div>
 </li>
 ```
 
 * **Error rate widget**
 ```html
 <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
-  <div id="newrelic_Error_Rate" data-id="newrelic_Error_Rate" data-view="Newrelic" data-title="Error rate" data-green="1" data-yellow="3"></div>
+  <div id="nr_xxxxx_Error_Rate" data-id="nr_xxxxx_Error_Rate" data-view="Newrelic" data-title="Error rate" data-green="1" data-yellow="3"></div>
 </li>
 ```
 
 * **Apdex widget**
 ```html
 <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
-  <div id="newrelic_Apdex" data-id="newrelic_Apdex" data-view="Newrelic" data-title="Apdex" data-green="0.9" data-yellow="0.8" ></div>
+  <div id="nr_xxxxx_Apdex" data-id="nr_xxxxx_Apdex" data-view="Newrelic" data-title="Apdex" data-green="0.9" data-yellow="0.8" ></div>
 </li>
 ```
 
@@ -85,12 +87,11 @@ Any value between `data-green` and `data-yellow` will be yellow. If `data-green`
 
 You can easily add new widgets using any value returned by the New Relic API. Follow this example to add a 'CPU' widget:
 
- * Copy one of the files in the `jobs` directory to a new filename, e.g. `cp newrelic_apdex.rb newrelic_cpu.rb`
- * Edit the first line of the newly created `newrelic_cpu.rb` to say `metric = 'CPU'`
- * Copy the dashboard widget HTML, replacing 'Apdex' with 'CPU' (if there are any spaces in the name of the new metric, replace them with underscores here) and customising the `data-green` and `data-yellow` limits:
+ * Add new metric to `metrics` array in file `config.yml`, for example `:metrics: [ 'Apdex', 'Error Rate', 'Response Time', 'Throughput', 'CPU' ]`
+ * Add widget to you dashboard:
 ```html
 <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
-  <div id="newrelic_CPU" data-id="newrelic_CPU" data-view="Newrelic" data-title="CPU" data-green="70" data-yellow="90" ></div>
+  <div id="nr_xxxxx_CPU" data-id="nr_xxxxx_CPU" data-view="Newrelic" data-title="CPU" data-green="70" data-yellow="90" ></div>
 </li>
 ```
  * You now have a CPU widget which will be green below 70%, yellow up to 90% and red above.
