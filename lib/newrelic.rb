@@ -3,31 +3,47 @@ require 'newrelic_api'
 
 class Newrelic
 
-  attr_reader :metric, :points
+  attr_reader :metrics, :points
 
-  def initialize(options)
-    @metric  = options[:metric]
-    @points  = points
-  end
+  #def initialize(options)
+  #  @metrics  = get_config[:metrics]
+  #  @points = {}
+  #end
 
   def points
-    unless history === false
-      history['data']['points'].map{|a| Hash[a.map{|k,v| [k.to_sym,v] }] }
-    else
-      (0..59).map{|a| { x: a, y: 0 } }
+    @history = {}
+    app_ids.each do |app_id|
+      metrics.each do |metric|
+        key = "nr_#{app_id}_#{metric.gsub(/ /,'_')}"
+        history = YAML.load Sinatra::Application.settings.history[key].to_s
+        unless history === false
+          @history[key] = history['data']['points'].map{|a| Hash[a.map{|k,v| [k.to_sym,v] }] }
+        else
+          @history[key] = (0..59).map{|a| { x: a, y: 0 } }
+        end
+      end
     end
+    @history
   end
 
-  def history
-    YAML.load Sinatra::Application.settings.history[stored_name].to_s
+  def get_values
+    @values = {}
+    app_ids.each do |app_id|
+      metrics.each do |metric|
+        key = "nr_#{app_id}_#{metric.gsub(/ /,'_')}"
+        nr_app = newrelic_app.select { |i| i.id = app_id }
+        @values[key]  = nr_app[0].threshold_values.select{|v| v.name.eql? metric}[0].metric_value
+      end
+    end
+    @values
   end
 
-  def get_value
-    app_select[0].threshold_values.select{|v| v.name.eql? @metric}[0].metric_value
+  def metrics
+    get_config[:metrics]
   end
 
-  def stored_name
-    "newrelic_#{@metric.gsub(/ /,'_')}"
+  def app_ids
+    get_config[:app_ids]
   end
 
   private
@@ -38,11 +54,7 @@ class Newrelic
   end
 
   def app_select
-    newrelic_app.select { |i| i.name =~ /#{app_name}/ }
-  end
-
-  def app_name
-    get_config[:app_name]
+    newrelic_app.select { |i| i.id = app_id }
   end
 
   def api_key
