@@ -1,3 +1,4 @@
 :newrelic:
   :api_key: "xxxxxxxxxxxxxxx"
-  :app_name: 'Your App Name'
+  :app_ids: [ 'xxxxx', 'yyyyy' ]
+  :metrics: [ 'Apdex', 'Error Rate', 'Response Time', 'Throughput' ]
