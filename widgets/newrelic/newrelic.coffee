@@ -2,11 +2,15 @@ class Dashing.Newrelic extends Dashing.Widget
   @accessor 'current', Dashing.AnimatedValue
 
   ready: ->
+    $node = $(@node)
+    $container = $node.parent()
+    $graph_height = (Dashing.widget_base_dimensions[1] * $container.data("sizey")) / 2 + 10
+    $graph_width = (Dashing.widget_base_dimensions[0] * $container.data("sizex"))
     @graph = new Rickshaw.Graph(
       element: document.querySelector("#" + this.id + " .newrelic-graph")
       renderer: 'area'
-      height: 180
-      width: 300
+      height: $graph_height
+      width: $graph_width
       series: [
         {
           color: "#fff",

@@ -16,7 +16,7 @@ $moreinfo-color:    rgba(255, 255, 255, 1.0);
 
   background-color: $background-color;
   background-position: center center;
-  background-image: url("/assets/nr.png");
+  background-image: url("/assets/newrelic.png");
 
   h2 {
     margin-bottom: -33px;
@@ -30,7 +30,7 @@ $moreinfo-color:    rgba(255, 255, 255, 1.0);
   .newrelic-graph {
     position: absolute;
     opacity: 0.8;
-    top: 178px;
+    top: 160px;
     left: 0;
   }
 
