@@ -5,7 +5,7 @@ class Dashing.Newrelic extends Dashing.Widget
     $node = $(@node)
     $container = $node.parent()
     $graph_height = (Dashing.widget_base_dimensions[1] * $container.data("sizey")) / 2 + 10
-    $graph_width = (Dashing.widget_base_dimensions[0] * $container.data("sizex"))
+    $graph_width = (Dashing.widget_base_dimensions[0] * $container.data("sizex")) + (($container.data("sizex") - 1 ) * 10)
     @graph = new Rickshaw.Graph(
       element: document.querySelector("#" + this.id + " .newrelic-graph")
       renderer: 'area'
@@ -13,20 +13,28 @@ class Dashing.Newrelic extends Dashing.Widget
       width: $graph_width
       series: [
         {
-          color: "#fff",
+          color: document.getElementById(this.id).getAttribute('data-graph-color'),
           data: [{ x:0, y:0}]
         }
       ]
     )
     @graph.series[0].data = @get('points') if @get('points')
+    @_createGraph @graph.series[0].data[@graph.series[0].data.length-1].y
     @graph.render()
 
   onData: (data) ->
+    @_createGraph data.current
 
+    if @graph
+      @graph.series[0].data = data.points
+      @graph.render()
+
+    $(@node).fadeOut().fadeIn()
+
+  _createGraph: (val) ->
     @responseGreen = document.getElementById(this.id).getAttribute('data-green')
     @responseYellow = document.getElementById(this.id).getAttribute('data-yellow')
 
-    val = data.current
     if (
       ((@responseGreen < @responseYellow) && (val <= @responseGreen)) ||
       ((@responseGreen > @responseYellow) && (val >= @responseGreen))
@@ -48,9 +56,3 @@ class Dashing.Newrelic extends Dashing.Widget
       $('#' + this.id + '.widget-newrelic h1').css('color', '#fff')
       $('#' + this.id + '.widget-newrelic h2').css('color', '#fff')
       $('#' + this.id + '.widget-newrelic .updated-at').css('color', '#fff')
-
-    if @graph
-      @graph.series[0].data = data.points
-      @graph.render()
-
-    $(@node).fadeOut().fadeIn()
